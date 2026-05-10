@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartAML - Reports</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">SmartAML</div>
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="reports.html" class="active">Reports</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="index.html">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h2>Reports</h2>
+        <p class="subtitle">View a summary of Smart AML detection results and model performance</p>
+        
+        <div class="metrics-grid">
+            <div class="metric-box"><span>Precision</span><span class="value">0.70</span></div>
+            <div class="metric-box dark"><span>Recall</span><span class="value">0.23</span></div>
+            <div class="metric-box"><span>ROC-AUC</span><span class="value">0.91</span></div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h3>Detection Summary</h3>
+            <p>High-risk alerts flagged: <strong>120</strong></p>
+            <p>Medium-risk alerts flagged: <strong>300</strong></p>
+            <p>Low-risk alerts flagged: <strong>1200</strong></p>
+            <p>Recommended threshold: <strong>0.9966</strong></p>
+        </div>
+
+        <div class="card">
+            <h3>System Insights</h3>
+            <ul style="color: var(--text-muted); line-height: 1.8;">
+                <li>The model achieved strong discrimination performance.</li>
+                <li>High precision suggests fewer false positive alerts.</li>
+                <li>The selected threshold prioritizes stronger confidence before flagging alerts.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

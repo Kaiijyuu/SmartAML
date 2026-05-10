@@ -1,0 +1,458 @@
+/* General Styles */
+:root {
+    --primary-blue: #2563eb;
+    --dark-bg: #111827;
+    --light-bg: #f9fafb;
+    --border-color: #e5e7eb;
+    --high-risk: #ef4444;
+    --medium-risk: #f59e0b;
+    --low-risk: #10b981;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+}
+
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--light-bg);
+    color: var(--text-main);
+}
+
+/* Navbar */
+nav {
+    background-color: white;
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+    margin: 0;
+}
+
+nav a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+nav a.active {
+    color: var(--text-main);
+    font-weight: bold;
+    background: #f3f4f6;
+    padding: 5px 10px;
+    border-radius: 15px;
+}
+
+/* Layout Containers */
+.container {
+    max-width: 1250px;
+    margin: 2rem auto;
+    padding: 0 20px;
+}
+
+.card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Typography */
+h1, h2, h3 { margin-top: 0; }
+.subtitle { color: var(--text-muted); margin-bottom: 2rem; }
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary { background: var(--primary-blue); color: white; width: 100%; }
+.btn-outline { border: 1px solid var(--border-color); background: white; color: var(--text-main); }
+.btn-red { background: var(--high-risk); color: white; }
+.btn-green { background: var(--low-risk); color: white; }
+
+/* Dashboard Specifics */
+.risk-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 2rem;
+}
+
+.risk-card {
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    color: black;
+}
+
+.risk-card h3 { margin-bottom: 5px; font-size: 1rem; }
+.risk-card .count { font-size: 2.5rem; font-weight: bold; }
+
+.high { background-color: #ff4d4d; }
+.med { background-color: #ffa500; }
+.low { background-color: #2ecc71; }
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th {
+    text-align: left;
+    padding: 12px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+td {
+    padding: 12px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.view-link {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* Login Page Only */
+.login-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--dark-bg);
+}
+
+.login-card {
+    background: white;
+    padding: 3rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.input-group {
+    text-align: left;
+    margin-bottom: 1.5rem;
+}
+
+.input-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; }
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Metrics for Reports */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.metric-box {
+    border: 1px solid var(--border-color);
+    background: white;
+    padding: 1.5rem;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.metric-box.dark { background: #333; color: white; }
+.metric-box .value { font-size: 2.5rem; font-weight: bold; display: block; margin-top: 10px; }
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+}
+
+.badge-high {
+    background: var(--high-risk);
+}
+
+.badge-medium {
+    background: var(--medium-risk);
+    color: #111827;
+}
+
+.badge-low {
+    background: var(--low-risk);
+}
+
+.status {
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.status.suspicious {
+    color: var(--high-risk);
+}
+
+.status.review {
+    color: var(--medium-risk);
+}
+
+.status.false-positive {
+    color: var(--low-risk);
+}
+
+.report-filter label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.report-filter input {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.suspicious-box {
+    border-top: 5px solid var(--high-risk);
+}
+
+.review-box {
+    border-top: 5px solid var(--medium-risk);
+}
+
+.false-box {
+    border-top: 5px solid var(--low-risk);
+}
+
+.investigation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 1.5rem;
+}
+
+.details-grid p {
+    color: var(--text-muted);
+    margin: 6px 0 0;
+}
+
+.ai-card {
+    border-left: 5px solid var(--primary-blue);
+}
+
+.ai-card ul {
+    color: var(--text-muted);
+    line-height: 1.8;
+}
+
+.decision-card {
+    border-left: 5px solid var(--medium-risk);
+}
+
+.decision-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    margin-left: 10px;
+}
+
+.transaction-filter {
+    display: flex;
+    gap: 18px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.transaction-filter label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.transaction-filter input,
+.transaction-filter select {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 20px;
+}
+
+.stat-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.stat-card h2 {
+    font-size: 2rem;
+    margin-top: 10px;
+}
+
+/* COLORS */
+.stat-card.warning {
+    border-left: 6px solid orange;
+}
+
+.stat-card.danger {
+    border-left: 6px solid red;
+}
+
+.stat-card.success {
+    border-left: 6px solid green;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    font-size: 13px;
+    color: #555;
+}
+
+td {
+    font-size: 14px;
+}
+
+/* Make customer name cleaner */
+td:nth-child(3) {
+    white-space: normal;
+    font-weight: 500;
+}
+
+/* Status styling spacing */
+td:nth-child(9) {
+    font-weight: 600;
+}
+
+.table-scroll {
+    width: 100%;
+    overflow-x: visible;
+}
+
+.transactions-table {
+    min-width: 0;
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.transactions-table th,
+.transactions-table td {
+    font-size: 13px;
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.transactions-table th {
+    font-size: 13px;
+    color: #555;
+}
+
+/* Fix specific columns */
+.transactions-table .amount-col {
+    min-width: 140px;
+}
+
+.transactions-table .status-col {
+    min-width: 150px;
+    font-weight: 600;
+}
+
+.transactions-table .action-col {
+    min-width: 80px;
+}
+
+.stat-link {
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+.report-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.report-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 42px;
+    padding: 0;
+    text-decoration: none;
+    white-space: nowrap;
+}

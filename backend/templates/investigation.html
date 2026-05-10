@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartAML - Investigation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo">SmartAML</div>
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/transactions">Transactions</a></li>
+            <li><a href="/reports">Reports</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Transaction Investigation</h2>
+        <p class="subtitle">Review transaction details, AI risk score, and investigation decision.</p>
+
+    <div class="card">
+        <h3>Customer Overview</h3>
+
+        <div class="details-grid">
+            <div>
+                <strong>Customer Name</strong>
+                <p>{{ tx.customer_summary.customer_name }}</p>
+            </div>
+            <div>
+                <strong>Customer ID</strong>
+                <p>{{ tx.customer_summary.customer_id }}</p>
+            </div>
+            <div>
+                <strong>Total Transactions</strong>
+                <p>{{ tx.customer_summary.total_transactions }}</p>
+            </div>
+            <div>
+                <strong>Total Amount</strong>
+                <p>BND{{ tx.customer_summary.total_amount }}</p>
+            </div>
+            <div>
+                <strong>Average Amount</strong>
+                <p>BND{{ tx.customer_summary.avg_amount }}</p>
+            </div>
+            <div>
+                <strong>High Risk Count</strong>
+                <p>{{ tx.customer_summary.high_risk_count }}</p>
+        </div>
+    </div>
+</div>
+
+
+        <div class="card">
+            <div class="investigation-header">
+                <div>
+                    <h3>ID: {{ tx.txn_id }}</h3>
+                    <p class="subtitle">Product Type: {{ tx.product_type }} | Channel: {{ tx.channel }}</p>
+                </div>
+
+                <div>
+                    <span class="badge badge-{{ tx.risk_label|lower }}">{{ tx.risk_label }}</span>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div>
+                    <strong>Amount</strong>
+                    <p>BND{{ tx.amount }}</p>
+                </div>
+                <div>
+                    <strong>Base Amount</strong>
+                    <p>BND{{ tx.amount_base }}</p>
+                </div>
+                <div>
+                    <strong>Country Origin</strong>
+                    <p>{{ tx.country_origin }}</p>
+                </div>
+                <div>
+                    <strong>Country Destination</strong>
+                    <p>{{ tx.country_dest }}</p>
+                </div>
+                <div>
+                    <strong>Currency</strong>
+                    <p>{{ tx.currency }}</p>
+                </div>
+                <div>
+                    <strong>Date / Time</strong>
+                    <p>{{ tx.dt }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+    <h3>{{ tx.context_title }}</h3>
+
+    <div class="details-grid">
+        <div>
+            <strong>Customer Name</strong>
+            <p>{{ tx.customer_name }}</p>
+        </div>
+        <div>
+            <strong>Origin Account</strong>
+            <p>{{ tx.origin_account }}</p>
+        </div>
+        <div>
+            <strong>Origin Bank</strong>
+            <p>{{ tx.origin_bank }}</p>
+        </div>
+        
+        {% if not tx.is_cash_transaction %}
+        <div>
+            <strong>Counterparty Name</strong>
+            <p>{{ tx.counterparty_name }}</p>
+        </div>
+        <div>
+            <strong>Destination Account</strong>
+            <p>{{ tx.destination_account }}</p>
+        </div>
+        <div>
+            <strong>Destination Bank</strong>
+            <p>{{ tx.destination_bank }}</p>
+        </div>
+        {% endif %}
+
+        <div>
+            <strong>Transfer Type</strong>
+            <p>{{ tx.transfer_type }}</p>
+        </div>
+        <div>
+            <strong>{% if tx.is_cash_transaction %}Transaction Location{% else %}Transfer Flow{% endif %}</strong>
+            <p>{{ tx.transfer_flow }}</p>
+        </div>
+    </div>
+</div>
+
+        <div class="card ai-card">
+            <h3>AI Analysis</h3>
+            <p>
+                SmartAML assigned this transaction a risk score of
+                <strong>{{ tx.risk_score }}</strong>.
+            </p>
+
+            <h4>Reasons identified:</h4>
+            <ul>
+                {% for reason in tx.reasons %}
+                    <li>{{ reason }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+
+        <div class="card">
+                <h3>Recent Customer Transactions</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Alert Ref</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Country</th>
+                            <th>AI Risk</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in tx.customer_summary.recent_rows %}
+                        <tr {% if item.is_current %}style="background:#fef3c7;"{% endif %}>
+                            <td>{{ item.txn_id }}</td>
+                            <td>{{ item.dt }}</td>
+                            <td>BND{{ item.amount }}</td>
+                            <td>{{ item.country }}</td>
+                            <td>
+                                <span class="badge badge-{{ item.risk_label|lower }}">
+                                    {{ item.risk_label }}
+                                </span>
+                            </td>
+                            <td>{{ item.risk_score }}</td>
+                            <td>{{ item.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        
+
+        <div class="card decision-card">
+            <h3>Investigation Decision</h3>
+            <p>Current status: <strong>{{ tx.decision }}</strong></p>
+
+            <form method="POST" action="/decision/{{ tx.txn_id }}" class="decision-actions">
+                <button type="submit" name="decision" value="Confirmed Suspicious" class="btn btn-red">
+                    Confirm Suspicious
+                </button>
+
+                <button type="submit" name="decision" value="False Positive" class="btn btn-green">
+                    Mark as False Positive
+                </button>
+
+                <a href="/transactions" class="btn btn-outline">Back to Transactions</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

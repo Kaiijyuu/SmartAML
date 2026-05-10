@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartAML - Transactions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo">SmartAML</div>
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/transactions" class="active">Transactions</a></li>
+            <li><a href="/reports">Reports</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Transactions</h2>
+        <p class="subtitle">Review transactions classified by SmartAML as suspicious, review required, or false positive.</p>
+
+        <div class="card" style="margin-bottom: 20px;">
+    <form method="GET" class="transaction-filter">
+        <div>
+            <label>Search:</label>
+            <input 
+                type="text" 
+                name="search" 
+                value="{{ search_query }}" 
+                placeholder="Search alert ref, customer, country"
+            >
+        </div>
+
+        <div>
+            <label>Filter by Status:</label>
+            <select name="status" onchange="this.form.submit()">
+                <option value="All" {% if filter_status=="All" %}selected{% endif %}>All</option>
+                <option value="Pending Review" {% if filter_status=="Pending Review" %}selected{% endif %}>Pending Review</option>
+                <option value="Confirmed Suspicious" {% if filter_status=="Confirmed Suspicious" %}selected{% endif %}>Confirmed Suspicious</option>
+                <option value="False Positive" {% if filter_status=="False Positive" %}selected{% endif %}>False Positive</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:auto;">Search</button>
+        <a href="/transactions" class="btn btn-outline">Reset</a>
+    </form>
+</div>
+
+    <div class="card table-card">
+        <div class="table-scroll">
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Alert Ref</th>
+                        <th>Alert Date</th>
+                        <th>Customer</th>
+                        <th>Customer ID</th>
+                        <th class="amount-col">Amount</th>
+                        <th>Country</th>
+                        <th>AI Risk</th>
+                        <th>Score</th>
+                        <th class="status-col">Status</th>
+                        <th class="action-col">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for tx in rows %}
+                    <tr>
+                        <td>{{ tx.txn_id }}</td>
+                        <td>{{ tx.dt }}</td>
+                        <td>{{ tx.customer_name}}</td>
+                        <td>{{ tx.customer_id }}</td>
+                        <td class="amount-col">BND{{ tx.amount }}</td>
+                        <td>{{ tx.country }}</td>
+                        <td>
+                            <span class="badge badge-{{ tx.risk_label|lower }}">
+                                {{ tx.risk_label }}
+                            </span>
+                        </td>
+                        <td>{{ tx.risk_score }}</td>
+                        <td class="status-col">
+                            {% if tx.status == "Confirmed Suspicious" %}
+                                <span class="status suspicious">Confirmed Suspicious</span>
+                            {% elif tx.status == "False Positive" %}
+                                <span class="status false-positive">False Positive</span>
+                            {% else %}
+                                <span class="status review">Pending Review</span>
+                            {% endif %}
+                        </td>
+                        <td class="action-col">
+                            <a href="/investigation/{{ tx.txn_id }}" class="view-link">VIEW</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

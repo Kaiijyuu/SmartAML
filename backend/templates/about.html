@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartAML - About</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo">SmartAML</div>
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="/transactions">Transactions</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="about.html" class="active">About</a></li>
+            <li><a href="index.html">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h2>About SmartAML</h2>
+        <p class="subtitle">An AI-powered framework for financial crime detection.</p>
+
+        <div class="card">
+            <h3>About the system</h3>
+            <p>SmartAML is an AI-based Anti-Money Laundering (AML) system designed to assist investigators in identifying suspicious financial transactions. The system applies machine learning techniques to analyse transaction patterns and detect potential risks.</p>
+            <p>By prioritising high-risk transactions and providing explainable insights, SmartAML helps reduce false positives and improves investigation efficiency.</p>
+            
+            <h3 style="margin-top: 2rem;">Key Features</h3>
+            <ul style="list-style-type: '- '; padding-left: 0;">
+                <li>AI-based transaction risk detection</li>
+                <li>High-risk transaction prioritisation</li>
+                <li>Explainable AI analysis for transparency</li>
+                <li>Dashboard for real-time monitoring</li>
+            </ul>
+
+            <h3 style="margin-top: 2rem;">System Purpose</h3>
+            <p>The purpose of SmartAML is to enhance financial crime detection processes by integrating AI-driven analysis into traditional AML workflows, supporting better decision-making and regulatory compliance.</p>
+        </div>
+    </div>
+</body>
+</html>

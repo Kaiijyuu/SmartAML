@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartAML - Reports</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo">SmartAML</div>
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/transactions">Transactions</a></li>
+            <li><a href="/reports" class="active">Reports</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Monthly AML Monitoring Report</h2>
+        <p class="subtitle">Summary of SmartAML transaction monitoring results for compliance review.</p>
+
+        <div class="card report-filter">
+            <h3>Report Period</h3>
+            
+            <form method="GET" action="/reports" class="filter-row">
+                <div>
+                    <label>Date Form</label>
+                    <input type="date" name="start_date" value="{{ report.start_date }}">
+                </div>
+
+                <div>
+                    <label>Date To</label>
+                    <input type="date" name="end_date" value="{{ report.end_date }}">
+                </div>
+            
+                <div class="report-actions">
+                    <button type="submit" class="btn report-btn btn-primary">
+                        Generate Report
+                    </button>
+
+                    <a 
+                        href="/export_csv?start_date={{ report.start_date }}&end_date={{ report.end_date }}" 
+                        class="btn report-btn btn-primary"
+                    >
+                        Export CSV
+                    </a>
+
+                    <a href="/reports" class="btn report-btn btn-outline">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-box">
+                <span>Total Reviewed</span>
+                <span class="value">{{ report.total_reviewed }}</span>
+            </div>
+            <div class="metric-box suspicious-box">
+                <span>Suspicious Alerts</span>
+                <span class="value">{{ report.suspicious }}</span>
+            </div>
+            <div class="metric-box review-box">
+                <span>Review Required</span>
+                <span class="value">{{ report.pending }}</span>
+            </div>
+        </div>
+
+        <div class="metrics-grid" style="margin-top: 20px;">
+            <div class="metric-box false-box">
+                <span>False Positives</span>
+                <span class="value">{{ report.false_positive }}</span>
+            </div>
+            <div class="metric-box">
+                <span>False Positive Rate</span>
+                <span class="value">{{ report.false_positive_rate }}%</span>
+            </div>
+            <div class="metric-box">
+                <span>Suspicious Rate</span>
+                <span class="value">{{ report.suspicious_rate }}%</span>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h3>Risk Classification Summary</h3>
+            <p><strong>Suspicious Alerts:</strong> Transactions classified as high-risk and requiring investigator attention.</p>
+            <p><strong>Review Required:</strong> Medium-risk transactions that may require additional review.</p>
+            <p><strong>False Positives:</strong> Low-risk transactions that are unlikely to require further investigation.</p>
+        </div>
+
+    
+
+        <div class="card">
+            <h3>Transaction Type Summary</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Transaction Type</th>
+                        <th>Number of Transactions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product, count in report.top_products.items() %}
+                    <tr>
+                        <td>{{ product }}</td>
+                        <td>{{ count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Compliance Summary</h3>
+            <ul style="color: var(--text-muted); line-height: 1.8;">
+                <li>SmartAML prioritises high-risk transactions to support faster AML review.</li>
+                <li>False positive classification helps investigators focus on more meaningful alerts.</li>
+                <li>The report can support monthly monitoring review and management reporting.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

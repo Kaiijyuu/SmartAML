@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartAML - Investigation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">SmartAML</div>
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="index.html">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h2>Transaction Details</h2>
+        <div class="card">
+            <h1 style="margin-bottom: 10px;">ID: TX123</h1>
+            <p style="color: var(--text-muted); line-height: 1.6;">
+                Amount: BND5000<br>
+                Country: SG<br>
+                Date: 01/01/2025<br>
+                Time: 19:00
+            </p>
+        </div>
+
+        <h3>AI Analysis</h3>
+        <p>"This transaction is flagged as high risk due to:</p>
+        <ul>
+            <li>Unusually high amount</li>
+            <li>Foreign transfer pattern</li>
+            <li>First-time interaction with this counter party"</li>
+        </ul>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+            <div>
+                <button class="btn btn-red" onclick="alert('Flagged as Suspicious')">Flag as Suspicious</button>
+                <button class="btn btn-green" onclick="alert('Marked as Normal')">Mark as Normal</button>
+            </div>
+            <a href="dashboard.html" class="btn btn-outline">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

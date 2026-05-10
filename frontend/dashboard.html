@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartAML - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">SmartAML</div>
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="index.html">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h3>Risk Summary</h3>
+        <div class="risk-grid">
+            <div class="risk-card high"><h3>High Risk</h3><div class="count">120</div></div>
+            <div class="risk-card med"><h3>Medium</h3><div class="count">300</div></div>
+            <div class="risk-card low"><h3>Low</h3><div class="count">1200</div></div>
+        </div>
+
+        <div class="card">
+            <h3>High Risk Transactions</h3>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Amount</th><th>Country</th><th>Risk</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>TX123</td><td>BND5000</td><td>SG</td><td>HIGH</td><td><a href="investigation.html" class="view-link">VIEW</a></td></tr>
+                    <tr><td>TXT456</td><td>BND9000</td><td>MY</td><td>HIGH</td><td><a href="investigation.html" class="view-link">VIEW</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Recent Transactions</h3>
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Amount</th><th>Country</th><th>Risk</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>TX001</td><td>BND200</td><td>BN</td><td>LOW</td><td><a href="#" class="view-link">VIEW</a></td></tr>
+                    <tr><td>TX002</td><td>BND800</td><td>MY</td><td>MEDIUM</td><td><a href="#" class="view-link">VIEW</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartAML - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="logo">SmartAML</div>
+        <ul>
+            <li><a href="home.html">Home</a></li>
+            <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            <li><a href="/transactions">Transactions</a></li>
+            <li><a href="reports.html">Reports</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="index.html">Logout</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h2>System Overview</h2>
+
+<div class="dashboard-grid">
+    <a href="/transactions" class="card stat-card stat-link">
+        <p>Total Transactions</p>
+        <h2>{{ total }}</h2>
+    </a>
+
+    <a href="/transactions?status=Pending+Review" class="card stat-card warning stat-link">
+        <p>Pending Review</p>
+        <h2>{{ pending }}</h2>
+    </a>
+
+    <a href="/transactions?status=Confirmed+Suspicious" class="card stat-card danger stat-link">
+        <p>Confirmed Suspicious</p>
+        <h2>{{ confirmed }}</h2>
+    </a>
+
+    <a href="/transactions?status=False+Positive" class="card stat-card success stat-link">
+        <p>False Positives</p>
+        <h2>{{ false_positive }}</h2>
+    </a>
+</div>
+
+        <div class="card">
+            <h3>High Risk Transactions</h3>
+            <table>
+                <thead>
+                    <tr><th>Alert Ref</th><th>Customer</th><th>Amount</th><th>Country</th><th>AI Risk</th><th>Score</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    {% for tx in high_rows %}
+                    <tr>
+                        <td>{{ tx.txn_id }}</td>
+                        <td>{{ tx.customer_name }}</td>
+                        <td>BND{{ tx.amount }}</td>
+                        <td>{{ tx.country }}</td>
+                        <td><span class="badge badge-{{ tx.risk_label|lower }}">{{ tx.risk_label }}</span></td>
+                        <td>{{ tx.risk_score }}</td>
+                        <td>{{ tx.status }}</td>
+                        <td><a href="/investigation/{{ tx.txn_id }}" class="view-link">VIEW</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Recent Transactions</h3>
+            <table>
+                <thead>
+                    <tr><th>Alert Ref</th><th>Customer</th><th>Amount</th><th>Country</th><th>AI Risk</th><th>Score</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    {% for tx in recent_rows %}
+                    <tr>
+                        <td>{{ tx.txn_id }}</td>
+                        <td>{{ tx.customer_name }}</td>
+                        <td>BND{{ tx.amount }}</td>
+                        <td>{{ tx.country }}</td>
+                        <td><span class="badge badge-{{ tx.risk_label|lower }}">{{ tx.risk_label }}</span></td>
+                        <td>{{ tx.risk_score }}</td>
+                        <td>{{ tx.status }}</td>
+                        <td><a href="/investigation/{{ tx.txn_id }}" class="view-link">VIEW</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
