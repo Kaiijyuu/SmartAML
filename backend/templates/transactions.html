@@ -35,6 +35,17 @@
         </div>
 
         <div>
+            <label>Dataset:</label>
+            <select name="dataset" onchange="this.form.submit()">
+                {% for ds in datasets %}
+                    <option value="{{ ds.value }}" {% if selected_dataset == ds.value %}selected{% endif %}>
+                        {{ ds.label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
             <label>Filter by Status:</label>
             <select name="status" onchange="this.form.submit()">
                 <option value="All" {% if filter_status=="All" %}selected{% endif %}>All</option>
@@ -45,8 +56,28 @@
         </div>
 
         <button type="submit" class="btn btn-primary" style="width:auto;">Search</button>
-        <a href="/transactions" class="btn btn-outline">Reset</a>
+        <a href="/transactions?dataset={{ selected_dataset }}" class="btn btn-outline">Reset</a>
     </form>
+
+    <form method="POST"
+      action="/upload_dataset"
+      enctype="multipart/form-data"
+      class="transaction-upload">
+
+    <div>
+        <label>Upload Monthly Dataset</label>
+        <input type="file"
+               name="dataset"
+               accept=".csv"
+               required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Upload Dataset
+    </button>
+    
+</form>
+
 </div>
 
     <div class="card table-card">

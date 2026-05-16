@@ -456,3 +456,80 @@ td:nth-child(9) {
     text-decoration: none;
     white-space: nowrap;
 }
+
+.btn-danger {
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-success {
+    background-color: #16a34a;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-success:hover {
+    background-color: #15803d;
+}
+
+.decision-actions{
+    display:flex;
+    gap:12px;
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+.transaction-filter .btn,
+.transaction-upload .btn {
+    height: 42px;
+    padding: 0 22px;
+    width: auto;
+}
+
+.transaction-filter{
+    display:flex;
+    align-items:flex-end;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.transaction-filter div{
+    display:flex;
+    flex-direction:column;
+}
+
+.transaction-filter input,
+.transaction-filter select,
+.transaction-upload input{
+    height:42px;
+    padding:0 12px;
+}
+
+.transaction-filter .btn,
+.transaction-upload .btn{
+    height:42px;
+    min-width:110px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.transaction-upload{
+    display:flex;
+    align-items:flex-end;
+    gap:15px;
+    margin-top:20px;
+}

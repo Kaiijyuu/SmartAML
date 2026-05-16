@@ -193,17 +193,31 @@
             <h3>Investigation Decision</h3>
             <p>Current status: <strong>{{ tx.decision }}</strong></p>
 
-            <form method="POST" action="/decision/{{ tx.txn_id }}" class="decision-actions">
-                <button type="submit" name="decision" value="Confirmed Suspicious" class="btn btn-red">
-                    Confirm Suspicious
-                </button>
+            {% if tx.reviewed_by %}
+                <p><strong>Reviewed by:</strong> {{ tx.reviewed_by }}</p>
+            {% endif %}
 
-                <button type="submit" name="decision" value="False Positive" class="btn btn-green">
-                    Mark as False Positive
-                </button>
+            {% if tx.reviewed_by %}
+                <p style="color: red; font-weight: 600;">
+                    This case has already been reviewed and locked.
+                </p>
+            {% else %}
+                <div class="decision-actions">
+                    <form method="POST" action="/decision/{{ tx.txn_id }}">
+                        <input type="hidden" name="decision" value="Confirmed Suspicious">
+                        <button type="submit" class="btn btn-danger">Confirm Suspicious</button>
+                    </form>
 
+                    <form method="POST" action="/decision/{{ tx.txn_id }}">
+                        <input type="hidden" name="decision" value="False Positive">
+                        <button type="submit" class="btn btn-success">Mark as False Positive</button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <div style="margin-top: 20px;">
                 <a href="/transactions" class="btn btn-outline">Back to Transactions</a>
-            </form>
+            </div>
         </div>
     </div>
 </body>

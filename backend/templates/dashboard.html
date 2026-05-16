@@ -49,6 +49,7 @@
                     <tr><th>Alert Ref</th><th>Customer</th><th>Amount</th><th>Country</th><th>AI Risk</th><th>Score</th><th>Status</th><th>Action</th></tr>
                 </thead>
                 <tbody>
+                {% if high_rows %}
                     {% for tx in high_rows %}
                     <tr>
                         <td>{{ tx.txn_id }}</td>
@@ -57,10 +58,25 @@
                         <td>{{ tx.country }}</td>
                         <td><span class="badge badge-{{ tx.risk_label|lower }}">{{ tx.risk_label }}</span></td>
                         <td>{{ tx.risk_score }}</td>
-                        <td>{{ tx.status }}</td>
+                        <td>
+                            {% if tx.status == "Confirmed Suspicious" %}
+                                <span class="status suspicious">Confirmed Suspicious</span>
+                            {% elif tx.status == "False Positive" %}
+                                <span class="status false-positive">False Positive</span>
+                            {% else %}
+                                <span class="status review">Pending Review</span>
+                            {% endif %}
+                        </td>
                         <td><a href="/investigation/{{ tx.txn_id }}" class="view-link">VIEW</a></td>
                     </tr>
                     {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding:20px; color:#777;">
+                            No high-risk transactions found for this dataset
+                        </td>
+                    </tr>
+                {% endif %}
                 </tbody>
             </table>
         </div>
@@ -80,7 +96,15 @@
                         <td>{{ tx.country }}</td>
                         <td><span class="badge badge-{{ tx.risk_label|lower }}">{{ tx.risk_label }}</span></td>
                         <td>{{ tx.risk_score }}</td>
-                        <td>{{ tx.status }}</td>
+                        <td>
+                            {% if tx.status == "Confirmed Suspicious" %}
+                                <span class="status suspicious">Confirmed Suspicious</span>
+                            {% elif tx.status == "False Positive" %}
+                                <span class="status false-positive">False Positive</span>
+                            {% else %}
+                                <span class="status review">Pending Review</span>
+                            {% endif %}
+                        </td>
                         <td><a href="/investigation/{{ tx.txn_id }}" class="view-link">VIEW</a></td>
                     </tr>
                     {% endfor %}

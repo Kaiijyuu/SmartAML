@@ -6,32 +6,112 @@ from typing import Any
 
 import joblib
 import pandas as pd
+from werkzeug.utils import secure_filename 
 import os
-from flask import Flask, abort, render_template, redirect, url_for, request, Response
+from flask import Flask, abort, render_template, redirect, url_for, request, Response, session, flash
 import csv
 from io import StringIO
 
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "global_xgb.pkl"
 DATA_PATH = BASE_DIR / "all_transactions.csv"
-METRICS_PATH = BASE_DIR / "global_metrics.json"  # optional if you copy it later
+METRICS_PATH = BASE_DIR / "global_metrics.json"
+UPLOAD_DIR = BASE_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 LABEL_COL = "label"
 DROP_COLS = ["label", "txn_id", "dt"]
 
 app = Flask(__name__)
+app.secret_key = "smartaml_prototype_secret_key"
 
-# Global in-memory stores
+#Global in-memory stores
 MODEL = None
 RAW_DF: pd.DataFrame | None = None
 ENCODED_DF: pd.DataFrame | None = None
 APP_DF: pd.DataFrame | None = None
 CASE_DECISIONS = {}
 
+USERS = {
+    "tester1": "SmartAML2025",
+    "tester2": "SmartAML2025",
+    "tester3": "SmartAML2025",
+    "tester4": "SmartAML2025",
+    "tester5": "SmartAML2025",
+    "tester6": "SmartAML2025",
+}
+
+def login_required():
+    if "username" not in session:
+        return redirect(url_for("index"))
+    return None
+
+
+def get_case_decision(txn_id: str) -> str:
+    record = CASE_DECISIONS.get(str(txn_id))
+    if isinstance(record, dict):
+        return record.get("decision", "Pending Review")
+    return record or "Pending Review"
+
+
+def get_case_reviewer(txn_id: str) -> str:
+    record = CASE_DECISIONS.get(str(txn_id))
+
+    if isinstance(record, dict):
+        reviewer = record.get("reviewed_by", "")
+
+        if pd.isna(reviewer) or str(reviewer).lower() == "nan":
+            return ""
+
+        return str(reviewer)
+
+    return ""
+
+
+def get_available_datasets():
+    datasets = [{"label": "Jan 2025", "value": "default"}]
+
+    for file in sorted(UPLOAD_DIR.glob("*.csv")):
+        name = file.stem.replace("_transactions", "").replace("_", " ").title()
+        datasets.append({
+            "label": name,
+            "value": file.name
+        })
+
+    return datasets
+
+
+def load_selected_dataset(selected_dataset):
+    if selected_dataset and selected_dataset != "default":
+        selected_path = UPLOAD_DIR / selected_dataset
+        if selected_path.exists():
+            df = pd.read_csv(selected_path)
+        else:
+            df = APP_DF.copy()
+    else:
+        df = APP_DF.copy()
+
+    # Safety columns for uploaded files
+    if "risk_label" not in df.columns:
+        df["risk_label"] = "LOW"
+
+    if "risk_score" not in df.columns:
+        df["risk_score"] = 0.0
+
+    if "country_dest" not in df.columns and "country_origin" in df.columns:
+        df["country_dest"] = df["country_origin"]
+
+    return df
+
+
 if os.path.exists("case_decisions.csv"):
-    df_decisions = pd.read_csv("case_decisions.csv")
+    df_decisions = pd.read_csv("case_decisions.csv", encoding="latin1")
+
     for _, row in df_decisions.iterrows():
-        CASE_DECISIONS[str(row["txn_id"])] = row["decision"]
+        CASE_DECISIONS[str(row.get("txn_id", ""))] = {
+            "decision": row.get("decision", "Pending Review"),
+            "reviewed_by": row.get("reviewed_by", ""),
+        }
 
 
 def encode_like_train(df: pd.DataFrame) -> pd.DataFrame:
@@ -367,7 +447,9 @@ def get_transaction_by_id(txn_id: str) -> dict[str, Any]:
         "risk_label": row.get("risk_label", "LOW"),
         "risk_score": round(float(row.get("risk_score", 0.0)), 4),
         "reasons": make_ai_reasons(row),
-        "decision": CASE_DECISIONS.get(str(row.get("txn_id", "")), "Pending Review"),
+        "decision": get_case_decision(str(row.get("txn_id", ""))),
+        "reviewed_by": get_case_reviewer(row.get("txn_id", "")),
+        "locked": bool(get_case_reviewer(row.get("txn_id", ""))) and get_case_reviewer(row.get("txn_id", "")) != session.get("username"),
         "customer_summary": customer_summary,
         "is_cash_transaction": "Cash" in map_product_type(row.get("product_type", ""), row.get("channel", "")),
         "context_title": "Cash Transaction Context" if "Cash" in map_product_type(row.get("product_type", ""), row.get("channel", "")) else "Transfer Context",
@@ -390,7 +472,7 @@ def get_customer_summary(customer_id: str, current_txn_id: str):
 
     for _, row in cust_df.head(8).iterrows():
         txn_id = str(row.get("txn_id", ""))
-        decision = CASE_DECISIONS.get(txn_id, "Pending Review")
+        decision = get_case_decision(txn_id)
 
         recent_rows.append({
             "txn_id": txn_id,
@@ -414,24 +496,43 @@ def get_customer_summary(customer_id: str, current_txn_id: str):
     }
 
 
-@app.route("/")
-@app.route("/index.html")
+@app.route("/", methods=["GET", "POST"])
+@app.route("/index.html", methods=["GET", "POST"])
 def index():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+
+        if username in USERS and USERS[username] == password:
+            session["username"] = username
+            return redirect(url_for("home"))
+
+        return render_template("index.html", error="Invalid username or password")
+
     return render_template("index.html")
 
 
 @app.route("/home")
 @app.route("/home.html")
 def home():
+    guard = login_required()
+    if guard:
+        return guard
+    
     return render_template("home.html")
 
 
 @app.route("/dashboard")
 @app.route("/dashboard.html")
 def dashboard():
+    guard = login_required()
+    if guard:
+        return guard
+    
     assert APP_DF is not None
 
-    df = APP_DF.copy().head(500)
+    selected_dataset = session.get("selected_dataset", "default")
+    df = load_selected_dataset(selected_dataset).head(500)
 
     total = len(df)
     pending = 0
@@ -440,11 +541,11 @@ def dashboard():
 
     for _, row in df.iterrows():
         txn_id = str(row.get("txn_id", ""))
-        manual_decision = CASE_DECISIONS.get(txn_id)
+        status = get_case_decision(txn_id)
 
-        if manual_decision == "Confirmed Suspicious":
+        if status == "Confirmed Suspicious":
             confirmed += 1
-        elif manual_decision == "False Positive":
+        elif status == "False Positive":
             false_positive += 1
         else:
             pending += 1
@@ -455,7 +556,7 @@ def dashboard():
     for _, row in high_df.iterrows():
         high_rows.append({
             "customer_name": generate_customer_name(row.get("customer_id", "")),
-            "status": CASE_DECISIONS.get(str(row.get("txn_id", "")), "Pending Review"),
+            "status": get_case_decision(str(row.get("txn_id", ""))),
             "txn_id": str(row.get("txn_id", "")),
             "amount": row.get("amount", ""),
             "country": row.get("country_dest", row.get("country_origin", "")),
@@ -468,7 +569,7 @@ def dashboard():
 
     for _, row in recent_df.iterrows():
         txn_id = str(row.get("txn_id", ""))
-        manual_decision = CASE_DECISIONS.get(txn_id)
+        manual_decision = get_case_decision(str(row.get("txn_id", "")))
 
         if manual_decision == "Confirmed Suspicious":
             status = "Confirmed Suspicious"
@@ -501,6 +602,10 @@ def dashboard():
 @app.route("/investigation")
 @app.route("/investigation.html")
 def investigation_default():
+    guard = login_required()
+    if guard:
+        return guard
+    
     # Default to top high-risk transaction
     assert APP_DF is not None
     top_txn_id = str(APP_DF.iloc[0]["txn_id"])
@@ -510,15 +615,32 @@ def investigation_default():
 
 @app.route("/decision/<txn_id>", methods=["POST"])
 def decision(txn_id: str):
-    decision_value = request.form.get("decision")
+    decision = request.form.get("decision")
 
-    CASE_DECISIONS[str(txn_id)] = decision_value
+    current_user = session.get("username", "unknown")
+    existing = CASE_DECISIONS.get(str(txn_id))
 
-    df = pd.DataFrame([
-        {"txn_id": k, "decision": v}
-        for k, v in CASE_DECISIONS.items()
+    if isinstance(existing, dict):
+        existing_reviewer = existing.get("reviewed_by", "")
+
+        if not pd.isna(existing_reviewer) and str(existing_reviewer).lower() != "nan" and existing_reviewer:
+            return redirect(url_for("investigation", txn_id=txn_id))
+
+    CASE_DECISIONS[str(txn_id)] = {
+        "decision": decision,
+        "reviewed_by": current_user,
+    }
+
+    df_save = pd.DataFrame([
+        {
+            "txn_id": key,
+            "decision": value.get("decision", "Pending Review"),
+            "reviewed_by": value.get("reviewed_by", ""),
+        }
+        for key, value in CASE_DECISIONS.items()
     ])
-    df.to_csv("case_decisions.csv", index=False)
+    
+    df_save.to_csv("case_decisions.csv", index=False)
 
     return redirect(url_for("investigation", txn_id=txn_id))
 
@@ -532,12 +654,31 @@ def investigation(txn_id: str):
 @app.route("/reports")
 @app.route("/reports.html")
 def reports():
+    guard = login_required()
+    if guard:
+        return guard
+    
     assert APP_DF is not None
 
-    df = APP_DF.copy()
+    selected_dataset = session.get("selected_dataset", "default")
+    df = load_selected_dataset(selected_dataset)
 
-    start_date = request.args.get("start_date", "2025-01-01")
-    end_date = request.args.get("end_date", "2025-01-31")
+    if "dt" in df.columns:
+        df["dt_clean"] = pd.to_datetime(df["dt"], errors="coerce")
+        valid_dates = df["dt_clean"].dropna()
+
+        if not valid_dates.empty:
+            default_start = valid_dates.min().strftime("%Y-%m-%d")
+            default_end = valid_dates.max().strftime("%Y-%m-%d")
+        else:
+            default_start = "2025-01-01"
+            default_end = "2025-01-31"
+    else:
+        default_start = "2025-01-01"
+        default_end = "2025-01-31"
+
+    start_date = request.args.get("start_date", default_start)
+    end_date = request.args.get("end_date", default_end)
 
     if "dt" in df.columns:
         df["dt_clean"] = pd.to_datetime(df["dt"], errors="coerce")
@@ -592,12 +733,17 @@ def reports():
 
 @app.route("/export_csv")
 def export_csv():
+    guard = login_required()
+    if guard:
+        return guard
+    
     assert APP_DF is not None
 
     start_date = request.args.get("start_date", "")
     end_date = request.args.get("end_date", "")
 
-    df = APP_DF.copy()
+    selected_dataset = session.get("selected_dataset", "default")
+    df = load_selected_dataset(selected_dataset)
 
     if "dt" in df.columns:
         df["dt_clean"] = pd.to_datetime(df["dt"], errors="coerce")
@@ -612,7 +758,7 @@ def export_csv():
 
     for _, row in df.iterrows():
         txn_id = str(row.get("txn_id", ""))
-        decision = CASE_DECISIONS.get(txn_id, "Pending Review")
+        decision = get_case_decision(txn_id)
 
         export_rows.append({
             "Alert Ref": txn_id,
@@ -643,42 +789,44 @@ def export_csv():
 @app.route("/transactions")
 @app.route("/transactions.html")
 def transactions():
+    guard = login_required()
+    if guard:
+        return guard
+    
     assert APP_DF is not None
 
     filter_status = request.args.get("status", "All")
     search_query = request.args.get("search", "").strip()
     
-    tx_df = APP_DF.copy().head(200)
+    selected_dataset = request.args.get("dataset", session.get("selected_dataset", "default"))
+    session["selected_dataset"] = selected_dataset
+    tx_df = load_selected_dataset(selected_dataset).head(200)
+    datasets = get_available_datasets()
 
     rows = []
     for _, row in tx_df.iterrows():
         risk = row.get("risk_label", "LOW")
         txn_id = str(row.get("txn_id", ""))
 
-        manual_decision = CASE_DECISIONS.get(txn_id)
+        status = get_case_decision(txn_id)
 
-        if manual_decision:
-            status = manual_decision
-        else:
-            status = "Pending Review"
-
-        #1. Define the country variable OUTSIDE the if block so it's always available
         display_country = row.get("country_dest", row.get("country_origin", ""))
+        customer_name = generate_customer_name(row.get("customer_id", ""))
 
         if search_query:
-            #2. Use that variable for the search
-            searchable_text = f"{txn_id} {row.get('customer_id', '')} {display_country}".lower()
+            searchable_text = f"{txn_id} {customer_name} {row.get('customer_id', '')} {display_country}".lower()
+            
             if search_query.lower() not in searchable_text:
                 continue
 
-        #    FILTER LOGIC
+        #FILTER LOGIC
         if filter_status != "All" and status != filter_status:
             continue
 
         rows.append({
             "txn_id": txn_id,
             "dt": "Unknown" if str(row.get("dt", ""))[:10] == "1970-01-01" else str(row.get("dt", ""))[:10],
-            "customer_name": generate_customer_name(row.get("customer_id", "")),
+            "customer_name": customer_name,
             "customer_id": row.get("customer_id", ""),
             "amount": row.get("amount", ""),
             "country": row.get("country_dest", row.get("country_origin", "")),
@@ -687,13 +835,42 @@ def transactions():
             "status": status,
         })
 
-    return render_template("transactions.html", rows=rows, filter_status=filter_status, search_query=search_query)
-
+    return render_template("transactions.html", rows=rows, filter_status=filter_status, search_query=search_query, datasets=datasets, selected_dataset=selected_dataset)
 
 @app.route("/about")
 @app.route("/about.html")
 def about():
+    guard = login_required()
+    if guard:
+        return guard
+    
     return render_template("about.html")
+
+@app.route("/upload_dataset", methods=["POST"])
+def upload_dataset():
+    guard = login_required()
+    if guard:
+        return guard
+
+    uploaded_file = request.files.get("dataset")
+
+    if not uploaded_file or uploaded_file.filename == "":
+        return redirect(url_for("transactions"))
+
+    filename = secure_filename(uploaded_file.filename)
+
+    if not filename.endswith(".csv"):
+        return redirect(url_for("transactions"))
+
+    save_path = UPLOAD_DIR / filename
+    uploaded_file.save(save_path)
+
+    return redirect(url_for("transactions"))
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("index"))
 
 
 if __name__ == "__main__":

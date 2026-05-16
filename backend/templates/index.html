@@ -8,15 +8,24 @@
 <body class="login-body">
     <h1 style="color: white; font-size: 3rem; margin-bottom: 2rem;">SmartAML</h1>
     <div class="login-card">
-        <form action="home.html">
+        
+        <form method="POST" action="/">
             <div class="input-group">
                 <label>Username:</label>
-                <input type="text" placeholder="Enter username" required>
+                
+                <input type="text" name="username" placeholder="Enter username" required>
             </div>
             <div class="input-group">
                 <label>Password:</label>
-                <input type="password" placeholder="Enter password" required>
+                
+                <input type="password" name="password" placeholder="Enter password" required>
             </div>
+            
+            
+            {% if error %}
+            <p style="color:red; font-weight:600;">{{ error }}</p>
+            {% endif %}
+
             <button type="submit" class="btn btn-primary">Sign In</button>
             <p><a href="#" style="font-size: 0.8rem; color: var(--text-muted);">Forgot password?</a></p>
         </form>
