@@ -189,6 +189,44 @@
             </div>
         
 
+        <div class="card">
+            <h3>Customer Alert History</h3>
+
+            {% if tx.customer_alert_history %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Alert Ref</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>AI Risk</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alert in tx.customer_alert_history %}
+                    <tr>
+                        <td>{{ alert.txn_id }}</td>
+                        <td>{{ alert.dt }}</td>
+                        <td>BND{{ alert.amount }}</td>
+                        <td>
+                            <span class="badge badge-{{ alert.risk_label|lower }}">
+                                {{ alert.risk_label }}
+                            </span>
+                        </td>
+                        <td>{{ alert.risk_score }}</td>
+                        <td>{{ alert.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="subtitle">No previous alerts found for this customer.</p>
+            {% endif %}
+        </div>
+            
+
         <div class="card decision-card">
             <h3>Investigation Decision</h3>
             <p>Current status: <strong>{{ tx.decision }}</strong></p>

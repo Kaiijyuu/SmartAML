@@ -357,6 +357,28 @@ def ensure_loaded() -> None:
         prepare_app_data()
 
 
+def get_customer_alert_history(customer_name, current_txn_id):
+    df = load_selected_dataset(session.get("selected_dataset", "default"))
+
+    history = []
+
+    for _, row in df.iterrows():
+        txn_id = str(row.get("txn_id", ""))
+        row_customer_name = generate_customer_name(row.get("customer_id", ""))
+
+        if row_customer_name == customer_name and txn_id != str(current_txn_id):
+            history.append({
+                "txn_id": txn_id,
+                "dt": "Unknown" if str(row.get("dt", ""))[:10] == "1970-01-01" else str(row.get("dt", ""))[:10],
+                "amount": row.get("amount", ""),
+                "risk_label": row.get("risk_label", "LOW"),
+                "risk_score": round(float(row.get("risk_score", 0.0)), 4),
+                "status": get_case_decision(txn_id)
+            })
+
+    return history[:5]
+
+
 def get_dashboard_tables() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     assert APP_DF is not None
 
@@ -420,7 +442,7 @@ def get_transaction_by_id(txn_id: str) -> dict[str, Any]:
 
     return {
         "txn_id": str(row.get("txn_id", "")),
-        "customer_name": f"Customer {customer_id}",
+        "customer_name": generate_customer_name(customer_id),
         "counterparty_name": f"Counterparty {counterparty_id}",
         "origin_account": mask_account(account_id or customer_id, "ACC"),
         "destination_account": mask_account(counterparty_id, "CP"),
@@ -429,6 +451,7 @@ def get_transaction_by_id(txn_id: str) -> dict[str, Any]:
         "transfer_type": "Cash Transaction" if is_cash_transaction else transfer_type,
         "transfer_flow": "Brunei cash transaction" if is_cash_transaction else f"{row.get('country_origin', '')} → {row.get('country_dest', '')}",
         "amount": row.get("amount", ""),
+        "customer_alert_history": get_customer_alert_history(generate_customer_name(customer_id),txn_id),
         "amount_base": row.get("amount_base", ""),
         "country_origin": row.get("country_origin", ""),
         "country_dest": row.get("country_dest", ""),
